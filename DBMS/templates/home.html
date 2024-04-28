@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .header-content {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            width: 100px; /* Adjust the width as needed */
+            height: auto; /* Maintain aspect ratio */
+            margin-right: 300px; /* Add some space between logo and text */
+        }
+        
+        .header-text {
+            margin: 10;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+                <h1 class="header-text">Lets Plan A Trip For You...</h1>
+            </div>
+            <hr class="line">
+            <a href="{{ url_for('profile') }}" class="profile-link">Profile</a>
+        </div>
+    </header>
+    <div class="container">
+        <div class="packages">
+            {% for package in packages %}
+            <div class="package">
+                <img src="{{ url_for('static', filename=package['image']) }}" alt="{{ package['name'] }}">
+                <h2>{{ package['name'] }}</h2>
+                <p>{{ package['description'] }}</p>
+                <p>Price: Rs. {{ package['price'] }}</p>
+                <a href="{{ package['link'] }}">Explore More</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
