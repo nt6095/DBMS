@@ -3,33 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Reservation</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles-view.css') }}">
-
+    <title>View Reservations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles-view-reservation.css') }}">
 </head>
 <body>
     <div class="container">
-        <h2>View Reservation</h2>
-        <img src="{{ url_for('static', filename='img-2.jpg') }}" alt="Himachal Pradesh">
-        <div class="reservation-details">
-            <h3>Reservation Details</h3>
-            <p><strong>Name:</strong> Nik</p>
-            <p><strong>Email:</strong> a@b.c</p>
-            <p><strong>Phone:</strong> 909090909090</p>
-            <p><strong>Date:</strong> 2024-05-10</p>
-            <p><strong>Time:</strong> 14:00</p>
-            <p><strong>Number of Guests:</strong> 4</p>
-            <p><strong>Place:</strong> Himachal</p>
+        <h2>View Reservations</h2>
+        <div class="reservations">
+            {% if reservations %}
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Guests</th>
+                        <th>Place</th>
+                    </tr>
+                    {% for reservation in reservations %}
+                        <tr>
+                            <td>{{ reservation[1] }}</td>
+                            <td>{{ reservation[2] }}</td>
+                            <td>{{ reservation[3] }}</td>
+                            <td>{{ reservation[4] }}</td>
+                            <td>{{ reservation[5] }}</td>
+                            <td>{{ reservation[6] }}</td>
+                            <td>{{ reservation[7] }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p>No reservations found.</p>
+            {% endif %}
         </div>
-        <div class="itinerary">
-            <h3>Itinerary</h3>
-            <p><strong>Day 1:</strong> Arrival in Himachal Pradesh</p>
-            <p><strong>Day 2:</strong> Explore Shimla</p>
-            <p><strong>Day 3:</strong> Visit Manali</p>
-            <p><strong>Day 4:</strong> Trekking in the Himalayas</p>
-            <p><strong>Day 5:</strong> Departure</p>
-        </div>
-        
     </div>
 </body>
 </html>

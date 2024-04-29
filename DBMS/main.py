@@ -64,6 +64,7 @@ packages = [
     }
 ]
 
+
 # Function to create the users table in the database
 def create_users_table():
     conn = sqlite3.connect('database.db')
@@ -89,7 +90,7 @@ def create_users_table():
 create_users_table()
 
 def create_user_details_table():
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect('database_details.db')
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS user_details (
@@ -111,6 +112,26 @@ def create_user_details_table():
 
 create_user_details_table()
 # Route for the home page
+
+def create_reservations_table():
+    conn = sqlite3.connect('database-1.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS reservations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            date TEXT NOT NULL,
+            time TEXT NOT NULL,
+            guests INTEGER NOT NULL,
+            place TEXT NOT NULL
+        );
+    ''')
+    conn.commit()
+    conn.close()
+
+create_reservations_table()
 
 @app.route('/')
 def home():
@@ -193,13 +214,11 @@ def dashboard():
                 address = request.form['address']
                 cust_id = generate_cust_id()
                 add_user_details(username, cust_id, name, home_city, email, contact_number, gender, age, address)
-                return redirect(url_for('home'))  # Redirect to home page after submitting details form
-            return render_template('details_form.html')  # Render details form if details not filled yet
+                return redirect(url_for('home')) 
+            return render_template('details_form.html')  
         else:
-            return redirect(url_for('home'))  # Redirect to home page if details already filled
+            return redirect(url_for('home')) 
     return redirect(url_for('login'))
-
-
 
 # Function to generate a unique cust_id
 def generate_cust_id():
@@ -207,7 +226,7 @@ def generate_cust_id():
 
 # Function to add user details to the database
 def add_user_details(username, cust_id, name, home_city, email, contact_number, gender, age, address):
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect('database_details.db')
     cursor = conn.cursor()
     cursor.execute('INSERT INTO user_details (cust_id, username, name, home_city, email, contact_number, gender, age, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
                    (cust_id, username, name, home_city, email, contact_number, gender, age, address))
@@ -235,42 +254,68 @@ def check_admin(username):
     conn.close()
     return bool(is_admin)
 
-# Route for displaying all users
 @app.route('/show_users')
 def show_users():
     if 'username' in session:
         username = session['username']
         is_admin = check_admin(username)
         if is_admin:
-            conn = sqlite3.connect('database.db')
+            conn = sqlite3.connect('database_details.db')
             cursor = conn.cursor()
             cursor.execute('''
-                SELECT users.username, user_details.name, user_details.home_city, user_details.email, 
-                       user_details.contact_number, user_details.gender, user_details.age, user_details.address 
-                FROM users 
-                LEFT JOIN user_details ON users.username = user_details.username
+                SELECT * FROM user_details
             ''')
-            users = cursor.fetchall()
+            users_details = cursor.fetchall()
             conn.close()
-            return render_template('admin.html', users=users)
-    return redirect(url_for('login'))
+            return render_template('all_users.html', users_details=users_details)
+        else:
+            return "You are not authorized to view this page."
+    else:
+        return redirect(url_for('login'))
 
+@app.route('/add_customer', methods=['POST'])
+def add_customer():
+    if request.method == 'POST':
+        username = request.form['username']
+        cust_id = generate_cust_id()  
+        name = request.form['name']
+        home_city = request.form['home_city']
+        email = request.form['email']
+        contact_number = request.form['contact_number']
+        gender = request.form['gender']
+        age = request.form['age']
+        address = request.form['address']
+
+        add_user_details(username, cust_id, name, home_city, email, contact_number, gender, age, address)
+
+        return redirect(url_for('admin'), error="Error in Adding customer")
+    
 # Route for deleting a user
-@app.route('/delete_user', methods=['POST'])
-def delete_user():
+@app.route('/delete_customer', methods=['POST'])
+def delete_customer():
     if 'username' in session:
         username = session['username']
         is_admin = check_admin(username)
         if is_admin:
             user_to_delete = request.form['username']
-            conn = sqlite3.connect('database.db')
+            conn = sqlite3.connect('database_details.db')
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM users WHERE username=?", (user_to_delete,))
-            cursor.execute("DELETE FROM user_details WHERE username=?", (user_to_delete,))
-            conn.commit()
-            conn.close()
-            return redirect(url_for('show_users'))
+            
+            # Check if the user exists before attempting to delete
+            cursor.execute("SELECT username FROM user_details WHERE username=?", (user_to_delete,))
+            existing_user = cursor.fetchone()
+            if existing_user:
+                #cursor.execute("DELETE FROM users WHERE username=?", (user_to_delete,))
+                cursor.execute("DELETE FROM user_details WHERE username=?", (user_to_delete,))
+                conn.commit()
+                conn.close()
+                return redirect(url_for('all_users'))
+            else:
+                print('User does not exist', 'error')
+                conn.close()
+                return redirect(url_for('all_users'))  # or any other appropriate action
     return redirect(url_for('login'))
+
 
 @app.route('/add_post', methods=['GET', 'POST'])
 def add_post():
@@ -290,13 +335,45 @@ def add_post():
 def update_post():
     return render_template('update_post.html')
 
-@app.route('/make_reservation')
+@app.route('/make_reservation', methods=['GET', 'POST'])
 def make_reservation():
-    return render_template('make_reservation.html')
+    if request.method == 'POST':
+        # Get the form data
+        name = request.form['name']
+        email = request.form['email']
+        phone = request.form['phone']
+        date = request.form['date']
+        time = request.form['time']
+        guests = request.form['guests']
+        place = request.form['place']
+
+        # Insert the reservation into the database
+        add_reservation(name, email, phone, date, time, guests, place)
+        
+        return redirect(url_for('view_reservation'))
+
+    return render_template('make_reservation.html', packages=packages)
+
+# Function to add reservation to the database
+def add_reservation(name, email, phone, date, time, guests, place):
+    conn = sqlite3.connect('database-1.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO reservations (name, email, phone, date, time, guests, place)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ''', (name, email, phone, date, time, guests, place))
+    conn.commit()
+    conn.close()
+
 
 @app.route('/view_reservation')
 def view_reservation():
-    return render_template('view_reservation.html')
+    conn = sqlite3.connect('database-1.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM reservations')
+    reservations = cursor.fetchall()
+    conn.close()
+    return render_template('view_reservation.html', reservations=reservations)
 
 # Route for the profile page
 @app.route('/profile')
@@ -351,7 +428,7 @@ def update_user_details(username, name, home_city, email, contact_number, gender
 
 # Function to get user details from the database
 def get_user_details(username):
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect('database_details.db')
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM user_details WHERE username=?', (username,))
     user_details = cursor.fetchone()
@@ -360,10 +437,30 @@ def get_user_details(username):
 
 
 # Route for the logout page
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
 def logout():
     session.pop('username', None)
     return redirect(url_for('login'))
+
+@app.route('/all_users')
+def all_users():
+    if 'username' in session:
+        username = session['username']
+        is_admin = check_admin(username)
+        if is_admin:
+            conn = sqlite3.connect('database_details.db')
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT * FROM user_details
+            ''')
+            users_details = cursor.fetchall()
+            conn.close()
+            return render_template('all_users.html', users_details=users_details)
+        else:
+            return "You are not authorized to view this page."
+    else:
+        return redirect(url_for('login'))
+    
 
 if __name__ == '__main__':
     app.run(debug=True)

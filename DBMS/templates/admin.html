@@ -2,7 +2,6 @@
 <html>
 <head>
     <title>Admin Page</title>
-    <link rel="stylesheet" type="text/css" href="admin.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -88,13 +87,13 @@
         <h1>Welcome to the Admin Page</h1>
         <p>This page is only accessible to admin users.</p>
         <div class="tabs">
-            <button class="tab" onclick="openTab('showUsers')">Show Users</button>
-            <button class="tab" onclick="openTab('add')">Add Customer</button>
-            <button class="tab" onclick="openTab('delete')">Delete Customer</button>
-            <button class="tab" onclick="openTab('update')">Update Customer</button>
+            <a class="tab" href="/show_users">Show Users</a>
+            <button class="tab" onclick="openTab('add')">Add Customer - Under Construction</button>
+            <button class="tab" onclick="openTab('delete')">Delete Customer </Under></button>
+            <button class="tab" onclick="openTab('update')">Update Customer - Under Construction</Under></button>
         </div>
 
-        <div id="showUsers" class="tab-content" style="display: block;"> <!-- Make sure this tab is initially visible -->
+        <!-- <div id="showUsers" class="tab-content" style="display: block;"> 
             <h2>All Users</h2>
             <table>
                 <thead>
@@ -110,7 +109,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Sample data -->
+                    
                     <tr>
                         <td>nik</td>
                         <td>Nik</td>
@@ -151,7 +150,7 @@
                         <td>28</td>
                         <td>1010 Pizza ki upar</td>
                     </tr>
-                    <!-- End of sample data -->
+                    
                     {% for user in users %}
                         <tr>
                             <td>{{ user[0] }}</td>
@@ -166,10 +165,34 @@
                     {% endfor %}
                 </tbody>
             </table>
+        </div> -->
+
+        <div id="showUsers" class="tab-content"">
+            <h2>All Users</h2>
+            <table border="1">
+                <tr>
+                    <th>ID</th>
+                    <th>User Name</th>
+                    <th>Name</th>
+                    <th>City</th>
+                    <th>Main</th>
+                    <th>Contact_no</th>
+                    <th>Gender</th>
+                </tr>
+                {% for user in users_details %}
+                <tr>
+                    <td>{{ user[1] }}</td>
+                    <td>{{ user[2] }}</td>
+                    <td>{{ user[3] }}</td>
+                    <td>{{ user[4] }}</td>
+                    <td>{{ user[5] }}</td>
+                    <td>{{ user[6] }}</td>
+                    <td>{{ user[7] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
         </div>
         
-        
-               
         <div id="add" class="tab-content">
             <h2>Add Customer</h2>
             <!-- Add Customer Form -->
@@ -199,6 +222,7 @@
                 <input type="submit" value="Submit">
             </form>
         </div>
+        
 
         <div id="delete" class="tab-content">
             <h2>Delete Customer</h2>

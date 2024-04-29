@@ -15,18 +15,21 @@
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required><br>
             <label for="phone">Phone:</label>
-            <input type="tel" id="phone" name="phone" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="Format: 123-456-7890" required><br>
+            <input type="tel" id="phone" name="phone" required><br>
             <label for="date">Date:</label>
             <input type="date" id="date" name="date" required><br>
             <label for="time">Time:</label>
             <input type="time" id="time" name="time" required><br>
-            <label for="guests">Number of Guests:</label>
+            <label for="guests">Number of Prople:</label>
             <input type="number" id="guests" name="guests" min="1" required><br>
-            <label for="special_requests">Place:</label>
-            <textarea id="special_requests" name="special_requests"></textarea><br>
-            <input type="submit" value="home">
+            <label for="place">Place:</label>
+            <select id="place" name="place">
+                {% for package in packages %}
+                <option value="{{ package['name'] }}">{{ package['name'] }}</option>
+                {% endfor %}
+            </select><br>
+            <input type="submit" value="Make Reservation">
         </form>
     </div>
 </body>
 </html>
-
